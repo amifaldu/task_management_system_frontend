@@ -1,0 +1,117 @@
+/* TaskItem.module.css */
+.taskTitle {
+  font-weight: 600;
+}
+
+.taskDescription {
+  color: #6c757d;
+}
+
+.noDescription {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.actionsCell {
+  width: 120px;
+  text-align: right;
+}
+
+.actionButton {
+  min-width: auto;
+}
+
+.editButton {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.editButton:hover {
+  background-color: #6c757d;
+  color: white;
+}
+
+.deleteButton {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.deleteButton:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Inline editing styles */
+.editableCell {
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.editableCell:hover {
+  background-color: #f8f9fa;
+}
+
+.inlineEditContainer {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.inlineTextarea {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 60px;
+  max-height: 120px;
+  border: 1px solid #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.inlineSelect {
+  font-size: 0.875rem;
+  border: 1px solid #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.clickableBadge {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clickableBadge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.updateSpinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.updateSpinner .spinner-border {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+/* Focus styles for accessibility */
+.inlineTextarea:focus,
+.inlineSelect:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Disable hover effect when editing */
+.editableCell.editing {
+  background-color: transparent;
+  cursor: default;
+}
+
+.editableCell.editing:hover {
+  background-color: transparent;
+}

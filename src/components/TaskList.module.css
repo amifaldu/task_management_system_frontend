@@ -1,0 +1,38 @@
+/* TaskList.module.css */
+.taskListContainer {
+  margin-top: 1rem;
+}
+
+.headerSection {
+  margin-bottom: 1.5rem;
+}
+
+.filterSection {
+  margin-bottom: 1.5rem;
+}
+
+.tableContainer {
+  min-height: 400px;
+}
+
+.actionsColumn {
+  width: 120px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.emptyList {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 0.375rem;
+}
+
+.table {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}

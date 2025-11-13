@@ -1,0 +1,58 @@
+/* TaskForm.module.css */
+.formContainer {
+  margin-top: 1rem;
+}
+
+.formCard {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.formHeader {
+  background-color: #6c757d !important;
+  color: white !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.formHeader h5 {
+  margin-bottom: 0 !important;
+}
+
+.formBody {
+  padding: 1rem !important;
+}
+
+.formGroup {
+  margin-bottom: 0.5rem;
+}
+
+.formLabel {
+  font-weight: 600;
+}
+
+.textareaControl {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.submitButton {
+  flex-grow: 1;
+}
+
+.loadingSpinner {
+  margin-right: 0.25rem;
+}
+
+.alertCompact {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  padding: 0.5rem 0.75rem;
+}
+
+.alertText {
+  font-size: 0.875rem;
+}
