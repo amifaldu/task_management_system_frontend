@@ -1,13 +1,25 @@
 import { gql } from '@apollo/client';
 
-// Query to fetch all tasks
+// Query to fetch all tasks with pagination
 export const GET_TASKS = gql`
-  query {
-    tasks {
-      id
-      title
-      description
-      status
+  query GetTasks($first: Int, $after: String) {
+    tasks(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          description
+          status
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
     }
   }
 `;

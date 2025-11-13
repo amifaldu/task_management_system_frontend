@@ -14,12 +14,24 @@ export const useApolloCache = () => {
   const addTaskToCache = (cache, newTask) => {
     try {
       const existingTasks = cache.readQuery({ query: GET_TASKS });
-      cache.writeQuery({
-        query: GET_TASKS,
-        data: {
-          tasks: [...(existingTasks?.tasks || []), newTask]
-        }
-      });
+      if (existingTasks?.tasks) {
+        const newEdge = {
+          __typename: 'TaskEdge',
+          node: newTask,
+          cursor: newTask.id // Use the task ID as cursor for simplicity
+        };
+
+        cache.writeQuery({
+          query: GET_TASKS,
+          data: {
+            tasks: {
+              ...existingTasks.tasks,
+              edges: [...existingTasks.tasks.edges, newEdge],
+              totalCount: existingTasks.tasks.totalCount + 1
+            }
+          }
+        });
+      }
     } catch (error) {
       console.error('Error adding task to cache:', error);
     }
@@ -37,9 +49,14 @@ export const useApolloCache = () => {
         cache.writeQuery({
           query: GET_TASKS,
           data: {
-            tasks: existingTasks.tasks.map(task =>
-              task.id === updatedTask.id ? updatedTask : task
-            )
+            tasks: {
+              ...existingTasks.tasks,
+              edges: existingTasks.tasks.edges.map(edge =>
+                edge.node.id === updatedTask.id
+                  ? { ...edge, node: updatedTask }
+                  : edge
+              )
+            }
           }
         });
       }
@@ -60,7 +77,11 @@ export const useApolloCache = () => {
         cache.writeQuery({
           query: GET_TASKS,
           data: {
-            tasks: existingTasks.tasks.filter(task => task.id !== taskId)
+            tasks: {
+              ...existingTasks.tasks,
+              edges: existingTasks.tasks.edges.filter(edge => edge.node.id !== taskId),
+              totalCount: Math.max(0, existingTasks.tasks.totalCount - 1)
+            }
           }
         });
       }
