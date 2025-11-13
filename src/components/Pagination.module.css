@@ -1,0 +1,47 @@
+.paginationContainer {
+  border-top: 1px solid #dee2e6;
+  padding-top: 1rem;
+}
+
+.paginationInfo {
+  font-size: 0.875rem;
+}
+
+.paginationControls {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pageIndicator {
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .paginationContainer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .paginationControls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .paginationInfo {
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .paginationControls .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .pageIndicator {
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+  }
+}

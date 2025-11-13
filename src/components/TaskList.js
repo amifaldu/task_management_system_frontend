@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useLocation } from 'react-router-dom';
 import { GET_TASKS } from '../graphql/queries';
@@ -6,16 +6,16 @@ import { DELETE_TASK } from '../graphql/mutations';
 import { Button, Table, Container, Row, Col, Form, Alert } from 'react-bootstrap';
 import TaskItem from './TaskItem';
 import LoadingSpinner from './LoadingSpinner';
+import Pagination from './Pagination';
 import { useTranslations } from '../hooks/useTranslations';
 import { useTaskActions } from '../hooks/useTaskActions';
 import { useSuccessMessage } from '../hooks/useSuccessMessage';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useApolloCache } from '../hooks/useApolloCache';
+import { usePagination } from '../hooks/usePagination';
 import styles from './TaskList.module.css';
 
 const TaskList = React.memo(() => {
-  const { data, loading, error } = useQuery(GET_TASKS);
-  const [deleteTask] = useMutation(DELETE_TASK);
   const [statusFilter, setStatusFilter] = React.useState('');
   const location = useLocation();
   const [successMessage, setSuccessMessage] = useSuccessMessage();
@@ -23,17 +23,45 @@ const TaskList = React.memo(() => {
   const { removeTaskFromCache } = useApolloCache();
   const { navigateToCreate, navigateToEdit } = useTaskActions();
   const {
-    currentLanguage,
-    availableLanguages,
     messages,
     navigation,
     table,
-    placeholders,
     formLabels,
     taskStatus,
-    alerts,
     t
   } = useTranslations();
+
+  const {
+    currentPage,
+    paginationInfo,
+    paginationText,
+    resetPagination,
+    updatePaginationState,
+    goToNextPage,
+    goToFirstPage,
+    getInitialPageVariables,
+    getNextPageVariables
+  } = usePagination();
+
+  // Get query variables based on current page
+  const getQueryVariables = useCallback(() => {
+    // For now, only support forward pagination from the beginning
+    // This is a limitation of the current GraphQL schema
+    if (currentPage === 0) {
+      return getInitialPageVariables();
+    }
+
+    // For subsequent pages, use the next page cursor
+    // This won't work for previous navigation without proper cursor history
+    return getNextPageVariables();
+  }, [currentPage, getInitialPageVariables, getNextPageVariables]);
+
+  const { data, loading, error } = useQuery(GET_TASKS, {
+    variables: getQueryVariables(),
+    notifyOnNetworkStatusChange: true,
+  });
+
+  const [deleteTask] = useMutation(DELETE_TASK);
 
   // Check for success message from navigation state
   useEffect(() => {
@@ -44,13 +72,28 @@ const TaskList = React.memo(() => {
     }
   }, [location.state, setSuccessMessage]);
 
-  const filteredTasks = useMemo(() => {
-    if (!data?.tasks) return [];
-    if (statusFilter === 'All' || !statusFilter) {
-      return data.tasks;
+  // Update pagination state when data changes
+  useEffect(() => {
+    if (data?.tasks) {
+      updatePaginationState(data.tasks.pageInfo, data.tasks.totalCount);
     }
-    return data.tasks.filter(task => task.status === statusFilter);
-  }, [data, statusFilter]);
+  }, [data, updatePaginationState]);
+
+  // Reset pagination when filter changes
+  useEffect(() => {
+    resetPagination();
+  }, [statusFilter, resetPagination]);
+
+  // Handle filter change
+  const handleFilterChange = useCallback((newStatus) => {
+    setStatusFilter(newStatus);
+  }, []);
+
+  // Extract tasks from edges
+  const tasks = useMemo(() => {
+    if (!data?.tasks?.edges) return [];
+    return data.tasks.edges.map(edge => edge.node);
+  }, [data]);
 
   const handleTaskDelete = async (id) => {
     const shouldDelete = window.confirm(messages.deleteConfirmation());
@@ -67,6 +110,20 @@ const TaskList = React.memo(() => {
         logError('Delete failed', error);
       }
     }
+  };
+
+  // Pagination handlers
+  const handleNextPage = () => {
+    goToNextPage();
+  };
+
+  const handlePreviousPage = () => {
+    // Reset to first page due to API limitations
+    goToFirstPage();
+  };
+
+  const handleFirstPage = () => {
+    goToFirstPage();
   };
 
   if (loading) {
@@ -113,7 +170,7 @@ const TaskList = React.memo(() => {
             <Form.Label>{formLabels.status()}</Form.Label>
             <Form.Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => handleFilterChange(e.target.value)}
             >
               <option value="">{taskStatus.all()}</option>
               <option value={taskStatus.todo()}>{taskStatus.todo()}</option>
@@ -126,7 +183,7 @@ const TaskList = React.memo(() => {
 
       <Row>
         <Col className={styles.tableContainer}>
-          {filteredTasks.length === 0 ? (
+          {tasks.length === 0 ? (
             <Alert variant="info" className={styles.emptyList}>
               {!statusFilter
                 ? messages.noTasks()
@@ -134,26 +191,41 @@ const TaskList = React.memo(() => {
               }
             </Alert>
           ) : (
-            <Table striped bordered hover responsive className={styles.table}>
-              <thead>
-                <tr>
-                  <th>{table.headers.title()}</th>
-                  <th>{table.headers.description()}</th>
-                  <th>{table.headers.status()}</th>
-                  <th className={`text-end ${styles.actionsColumn}`}>{table.headers.actions()}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onEdit={navigateToEdit}
-                    onDelete={handleTaskDelete}
-                  />
-                ))}
-              </tbody>
-            </Table>
+            <>
+              <Table striped bordered hover responsive className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>{table.headers.title()}</th>
+                    <th>{table.headers.description()}</th>
+                    <th>{table.headers.status()}</th>
+                    <th className={`text-end ${styles.actionsColumn}`}>{table.headers.actions()}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasks.map((task) => (
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      onEdit={navigateToEdit}
+                      onDelete={handleTaskDelete}
+                    />
+                  ))}
+                </tbody>
+              </Table>
+
+              {/* Pagination Component */}
+              <Pagination
+                currentPage={paginationInfo.currentPage}
+                totalPages={paginationInfo.totalPages}
+                hasNextPage={data?.tasks?.pageInfo?.hasNextPage || false}
+                hasPreviousPage={data?.tasks?.pageInfo?.hasPreviousPage || false}
+                paginationText={paginationText}
+                onNextPage={handleNextPage}
+                onPreviousPage={handlePreviousPage}
+                onFirstPage={handleFirstPage}
+                loading={loading}
+              />
+            </>
           )}
         </Col>
       </Row>

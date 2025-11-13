@@ -1,6 +1,5 @@
 {
   "common": {
-    // General UI text labels (buttons, messages, etc.)
     "title": "Title",
     "description": "Description",
     "status": "Status",
@@ -15,20 +14,17 @@
     "success": "Success"
   },
   "taskStatus": {
-    // Different task statuses (e.g., To Do, In Progress, Done)
     "todo": "To Do",
     "inProgress": "In Progress",
     "done": "Done",
     "all": "All"
   },
   "placeholders": {
-    // Placeholder text for form inputs (e.g., title, description)
     "title": "Enter task title",
     "description": "Enter task description",
     "statusSelect": "Select status"
   },
   "formLabels": {
-    // Labels for the task creation/edit form fields and buttons
     "title": "Title",
     "description": "Description",
     "status": "Status",
@@ -37,7 +33,6 @@
     "cancel": "Cancel"
   },
   "messages": {
-    // Messages shown during various app states (loading, success, error, etc.)
     "loadingTasks": "Loading tasks...",
     "loadingTask": "Loading task...",
     "errorLoadingTasks": "Error loading tasks",
@@ -53,13 +48,11 @@
     "validationDescriptionRequired": "Description is required"
   },
   "navigation": {
-     // Navigation labels for different pages (task list, create/edit task)
     "home": "Task List",
     "createTask": "Create Task",
     "editTask": "Edit Task"
   },
   "table": {
-     // Table headers and no data message
     "headers": {
       "title": "Title",
       "description": "Description",
@@ -69,10 +62,17 @@
     "noData": "No tasks available"
   },
   "alerts": {
-    //alert types (success, error, warning, info)
     "success": "Success!",
     "error": "Error!",
     "warning": "Warning!",
     "info": "Info!"
+  },
+  "pagination": {
+    "first": "First",
+    "previous": "Previous",
+    "next": "Next",
+    "last": "Last",
+    "page": "Page {{current}} of {{total}}",
+    "showing": "Showing {{start}} to {{end}} of {{total}} tasks"
   }
 }
