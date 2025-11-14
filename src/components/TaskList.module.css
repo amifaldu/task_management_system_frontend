@@ -11,6 +11,10 @@
   margin-bottom: 1.5rem;
 }
 
+.filterSelect {
+  max-width: 200px;
+}
+
 .tableContainer {
   min-height: 400px;
 }

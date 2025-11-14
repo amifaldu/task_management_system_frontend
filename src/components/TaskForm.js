@@ -85,7 +85,6 @@ const TaskForm = React.memo(({
                     ref={statusRef}
                     size="sm"
                   >
-                    <option value="">{placeholders.statusSelect()}</option>
                     <option value={taskStatus.todo()}>{taskStatus.todo()}</option>
                     <option value={taskStatus.inProgress()}>{taskStatus.inProgress()}</option>
                     <option value={taskStatus.done()}>{taskStatus.done()}</option>
@@ -120,7 +119,7 @@ const TaskForm = React.memo(({
 
                 {error && (
                   <Alert variant="danger" className={styles.alertCompact}>
-                    <span className={styles.alertText}>{getErrorMessage()}</span>
+                    <span className={styles.alertText}>{getErrorMessage(error)}</span>
                   </Alert>
                 )}
 

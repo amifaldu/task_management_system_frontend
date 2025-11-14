@@ -10,6 +10,7 @@ export const usePagination = () => {
   const [startCursor, setStartCursor] = useState(null);
   const [endCursor, setEndCursor] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [cursorHistory, setCursorHistory] = useState([null]); // Store cursor for each page
   const { t } = useTranslations();
 
   const resetPagination = useCallback(() => {
@@ -19,6 +20,7 @@ export const usePagination = () => {
     setStartCursor(null);
     setEndCursor(null);
     setTotalCount(0);
+    setCursorHistory([null]);
   }, []);
 
   const updatePaginationState = useCallback((pageInfo, totalCountValue) => {
@@ -27,24 +29,36 @@ export const usePagination = () => {
     setStartCursor(pageInfo.startCursor);
     setEndCursor(pageInfo.endCursor);
     setTotalCount(totalCountValue);
-  }, []);
 
-  const getNextPageVariables = useCallback(() => {
-    if (!hasNextPage) return null;
+    // Update cursor history when we have a new endCursor
+    if (pageInfo.endCursor && currentPage >= 0) {
+      setCursorHistory(prev => {
+        const newHistory = [...prev];
+        // Ensure the array is long enough
+        while (newHistory.length <= currentPage) {
+          newHistory.push(null);
+        }
+        newHistory[currentPage] = pageInfo.endCursor;
+        return newHistory;
+      });
+    }
+  }, [currentPage]);
 
-    return {
-      first: TASKS_PER_PAGE,
-      after: endCursor
-    };
-  }, [hasNextPage, endCursor]);
-
-  
-  const getInitialPageVariables = useCallback(() => {
-    return {
-      first: TASKS_PER_PAGE,
-      after: null
-    };
-  }, []);
+  const getQueryVariables = useCallback(() => {
+    if (currentPage === 0) {
+      // First page - only send first
+      return {
+        first: TASKS_PER_PAGE
+      };
+    } else {
+      // Subsequent pages - use cursor from history
+      const cursorForPage = cursorHistory[currentPage - 1]; // Use cursor from previous page
+      return {
+        first: TASKS_PER_PAGE,
+        after: cursorForPage
+      };
+    }
+  }, [currentPage, cursorHistory]);
 
   const goToNextPage = useCallback(() => {
     if (hasNextPage) {
@@ -52,10 +66,22 @@ export const usePagination = () => {
     }
   }, [hasNextPage]);
 
-  
+  const goToPreviousPage = useCallback(() => {
+    if (hasPreviousPage && currentPage > 0) {
+      setCurrentPage(prev => prev - 1);
+    }
+  }, [hasPreviousPage, currentPage]);
+
   const goToFirstPage = useCallback(() => {
     setCurrentPage(0);
+    setEndCursor(null); // Reset cursor for first page
+    setCursorHistory([null]); // Reset cursor history
   }, []);
+
+  const goToLastPage = useCallback(() => {
+    const lastPage = Math.max(0, Math.ceil(totalCount / TASKS_PER_PAGE) - 1);
+    setCurrentPage(lastPage);
+  }, [totalCount]);
 
   const paginationInfo = {
     currentPage: currentPage + 1, // Convert to 1-based index for display
@@ -84,16 +110,18 @@ export const usePagination = () => {
     totalCount,
     paginationInfo,
     paginationText,
+    cursorHistory,
 
     // Actions
     resetPagination,
     updatePaginationState,
     goToNextPage,
+    goToPreviousPage,
     goToFirstPage,
+    goToLastPage,
 
-    // Query variable helpers
-    getNextPageVariables,
-    getInitialPageVariables,
+    // Query variable helper
+    getQueryVariables,
 
     // Constants
     TASKS_PER_PAGE

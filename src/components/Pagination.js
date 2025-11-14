@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
-import { useTranslations } from '../hooks/useTranslations';
+// import { useTranslations } from '../hooks/useTranslations'; // Not used in this component
 import styles from './Pagination.module.css';
 
 const Pagination = ({
@@ -14,8 +14,7 @@ const Pagination = ({
   onFirstPage,
   loading = false
 }) => {
-  const { t } = useTranslations();
-
+  
   if (totalPages <= 1) {
     return null;
   }
@@ -33,9 +32,9 @@ const Pagination = ({
             size="sm"
             onClick={onFirstPage}
             disabled={currentPage === 1 || loading}
-            title={t('pagination.first')}
+            title="First page"
           >
-            &laquo; {t('pagination.first')}
+            &laquo; First
           </Button>
 
           <Button
@@ -43,14 +42,14 @@ const Pagination = ({
             size="sm"
             onClick={onPreviousPage}
             disabled={!hasPreviousPage || loading}
-            title={t('pagination.previous')}
+            title="Previous page"
           >
-            &lsaquo; {t('pagination.previous')}
+            &lsaquo; Previous
           </Button>
 
           <div className={styles.pageIndicator}>
             <span className="fw-bold">
-              {t('pagination.page', { current: currentPage, total: totalPages })}
+              Page {currentPage} of {totalPages}
             </span>
           </div>
 
@@ -59,19 +58,9 @@ const Pagination = ({
             size="sm"
             onClick={onNextPage}
             disabled={!hasNextPage || loading}
-            title={t('pagination.next')}
+            title="Next page"
           >
-            {t('pagination.next')} &rsaquo;
-          </Button>
-
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={() => {/* Last page functionality would need cursor implementation */}}
-            disabled={!hasNextPage || loading}
-            title={t('pagination.last')}
-          >
-            {t('pagination.last')} &raquo;
+            Next &rsaquo;
           </Button>
         </div>
       </Col>
