@@ -1,9 +1,9 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useLocation } from 'react-router-dom';
 import { GET_TASKS } from '../graphql/queries';
 import { DELETE_TASK } from '../graphql/mutations';
-import { Button, Table, Container, Row, Col, Form, Alert } from 'react-bootstrap';
+import { Button, Table, Container, Row, Col, Alert, Form } from 'react-bootstrap';
 import TaskItem from './TaskItem';
 import LoadingSpinner from './LoadingSpinner';
 import Pagination from './Pagination';
@@ -13,10 +13,12 @@ import { useSuccessMessage } from '../hooks/useSuccessMessage';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useApolloCache } from '../hooks/useApolloCache';
 import { usePagination } from '../hooks/usePagination';
+import { STATUS_OPTIONS } from '../constants/statusConstants';
+import { mapStatusToEnum } from '../utils/statusUtils';
 import styles from './TaskList.module.css';
 
+
 const TaskList = React.memo(() => {
-  const [statusFilter, setStatusFilter] = React.useState('');
   const location = useLocation();
   const [successMessage, setSuccessMessage] = useSuccessMessage();
   const { logError } = useErrorHandler();
@@ -26,39 +28,29 @@ const TaskList = React.memo(() => {
     messages,
     navigation,
     table,
-    formLabels,
-    taskStatus,
     t
   } = useTranslations();
+  const [statusFilter, setStatusFilter] = useState('All');
 
   const {
-    currentPage,
     paginationInfo,
     paginationText,
-    resetPagination,
     updatePaginationState,
     goToNextPage,
+    goToPreviousPage,
     goToFirstPage,
-    getInitialPageVariables,
-    getNextPageVariables
+    getQueryVariables
   } = usePagination();
 
-  // Get query variables based on current page
-  const getQueryVariables = useCallback(() => {
-    // For now, only support forward pagination from the beginning
-    // This is a limitation of the current GraphQL schema
-    if (currentPage === 0) {
-      return getInitialPageVariables();
-    }
+  const queryVariables = useMemo(() => ({
+    ...getQueryVariables(),
+    ...(statusFilter !== 'All' && { status: mapStatusToEnum(statusFilter) })
+  }), [getQueryVariables, statusFilter]);
 
-    // For subsequent pages, use the next page cursor
-    // This won't work for previous navigation without proper cursor history
-    return getNextPageVariables();
-  }, [currentPage, getInitialPageVariables, getNextPageVariables]);
-
-  const { data, loading, error } = useQuery(GET_TASKS, {
-    variables: getQueryVariables(),
+  const { data, loading, error, refetch } = useQuery(GET_TASKS, {
+    variables: queryVariables,
     notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'cache-and-network',
   });
 
   const [deleteTask] = useMutation(DELETE_TASK);
@@ -67,10 +59,14 @@ const TaskList = React.memo(() => {
   useEffect(() => {
     if (location.state?.successMessage) {
       setSuccessMessage(location.state.successMessage);
+      // Refetch tasks if requested
+      if (location.state?.refetchTasks) {
+        refetch();
+      }
       // Clear location state
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, setSuccessMessage]);
+  }, [location.state, setSuccessMessage, refetch]);
 
   // Update pagination state when data changes
   useEffect(() => {
@@ -79,16 +75,8 @@ const TaskList = React.memo(() => {
     }
   }, [data, updatePaginationState]);
 
-  // Reset pagination when filter changes
-  useEffect(() => {
-    resetPagination();
-  }, [statusFilter, resetPagination]);
-
-  // Handle filter change
-  const handleFilterChange = useCallback((newStatus) => {
-    setStatusFilter(newStatus);
-  }, []);
-
+  
+  
   // Extract tasks from edges
   const tasks = useMemo(() => {
     if (!data?.tasks?.edges) return [];
@@ -106,6 +94,8 @@ const TaskList = React.memo(() => {
           }
         });
         setSuccessMessage(messages.taskDeletedSuccess());
+        // Refetch data to ensure UI is updated properly
+        await refetch();
       } catch (error) {
         logError('Delete failed', error);
       }
@@ -118,11 +108,16 @@ const TaskList = React.memo(() => {
   };
 
   const handlePreviousPage = () => {
-    // Reset to first page due to API limitations
-    goToFirstPage();
+    goToPreviousPage();
   };
 
   const handleFirstPage = () => {
+    goToFirstPage();
+  };
+
+  const handleStatusFilterChange = (e) => {
+    setStatusFilter(e.target.value);
+    // Reset pagination to first page when filter changes
     goToFirstPage();
   };
 
@@ -164,31 +159,32 @@ const TaskList = React.memo(() => {
         </Row>
       )}
 
+      {/* Status Filter */}
       <Row className={styles.filterSection}>
         <Col md={4}>
           <Form.Group>
-            <Form.Label>{formLabels.status()}</Form.Label>
+            <Form.Label>{table.headers.status()}</Form.Label>
             <Form.Select
               value={statusFilter}
-              onChange={(e) => handleFilterChange(e.target.value)}
+              onChange={handleStatusFilterChange}
             >
-              <option value="">{taskStatus.all()}</option>
-              <option value={taskStatus.todo()}>{taskStatus.todo()}</option>
-              <option value={taskStatus.inProgress()}>{taskStatus.inProgress()}</option>
-              <option value={taskStatus.done()}>{taskStatus.done()}</option>
+              {STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
             </Form.Select>
           </Form.Group>
         </Col>
       </Row>
-
+      
       <Row>
         <Col className={styles.tableContainer}>
           {tasks.length === 0 ? (
             <Alert variant="info" className={styles.emptyList}>
-              {!statusFilter
+              {statusFilter === 'All'
                 ? messages.noTasks()
-                : messages.noFilteredTasks(statusFilter)
-              }
+                : messages.noFilteredTasks(statusFilter)}
             </Alert>
           ) : (
             <>

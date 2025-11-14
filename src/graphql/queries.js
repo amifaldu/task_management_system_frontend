@@ -1,9 +1,9 @@
 import { gql } from '@apollo/client';
 
-// Query to fetch all tasks with pagination
+// Query to fetch all tasks with pagination and optional status filter
 export const GET_TASKS = gql`
-  query GetTasks($first: Int, $after: String) {
-    tasks(first: $first, after: $after) {
+  query GetTasks($first: Int, $after: String, $status: StatusEnum) {
+    tasks(first: $first, after: $after, status: $status) {
       edges {
         node {
           id

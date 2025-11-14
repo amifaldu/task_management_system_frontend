@@ -20,6 +20,7 @@ export const useTaskActions = () => {
   const navigateToHomeWithSuccess = (successMessage) => {
     navigate('/', { state: { successMessage } });
   };
+
   // Return an object with all the navigation functions
   return {
     navigateToCreate,

@@ -20,6 +20,14 @@ class ErrorBoundary extends React.Component {
       error: error,
       errorInfo: errorInfo,
     });
+
+    // Log error details for debugging
+    console.error('ErrorBoundary caught an error:', {
+      error: error.toString(),
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString()
+    });
   }
 
   // Retry button handler to reset error state
