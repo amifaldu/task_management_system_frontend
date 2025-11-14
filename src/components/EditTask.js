@@ -33,7 +33,6 @@ const EditTask = React.memo(() => {
     titleRef,  // Ref for task title input
     descriptionRef,  // Ref for task description input
     statusRef,  // Ref for task status input
-    resetForm,  // Function to reset the form fields
     setFormData,  // Function to populate form fields with task data
     getFormData,  // Function to get data from the form fields
     validateForm,  // Function to validate the form
@@ -44,7 +43,7 @@ const EditTask = React.memo(() => {
     if (task) {
       setFormData(task);  // Set the form data with the fetched task
     }
-  }, [task?.id, setFormData]);  // Run the effect when task ID changes
+  }, [task, setFormData]);  // Run the effect when task changes
 
   // Handle form submission: Validate, collect data, and update task
   const handleSubmit = async () => {
@@ -80,7 +79,7 @@ const EditTask = React.memo(() => {
     return (
       <div className="container mt-4">
         <div className="alert alert-danger">
-          {messages.errorLoadingTasks()}: {error.message}  // Show error message if data fetch fails
+          {messages.errorLoadingTasks()}: {error.message}{/* Show error message if data fetch fails */}
         </div>
       </div>
     );
@@ -90,7 +89,7 @@ const EditTask = React.memo(() => {
     return (
       <div className="container mt-4">
         <div className="alert alert-warning">
-          {messages.taskNotFound()}  // Show warning message if the task is not found
+          {messages.taskNotFound()}{/* Show warning message if the task is not found */}
         </div>
       </div>
     );
