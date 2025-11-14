@@ -21,7 +21,7 @@ const TaskForm = React.memo(({
 }) => {
   const { navigateToHome } = useTaskActions();
   const { getErrorMessage } = useErrorHandler();
-  const { formLabels, placeholders, taskStatus, messages, alerts, t } = useTranslations();
+  const { formLabels, placeholders, taskStatus, messages } = useTranslations();
 // Handle form submission: prevents default and triggers the passed onSubmit function
   const handleSubmit = (e) => {
     e.preventDefault();
