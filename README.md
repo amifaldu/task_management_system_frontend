@@ -1,70 +1,176 @@
-# Getting Started with Create React App
+# Task Management Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based task management application with GraphQL integration, featuring pagination.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Task Management**: Create, read, update, and delete tasks
+- **GraphQL Integration**: Efficient data fetching with Apollo Client
+- **Pagination**: Handle large datasets with cursor-based pagination
+- **Docker Support**: Containerized deployment ready
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend**: React 19.2.0
+- **State Management**: Apollo Client (GraphQL)
+- **UI Framework**: React Bootstrap 2.10.10
+- **Styling**: Bootstrap 5.3.8 + CSS Modules
+- **Internationalization**: i18next + react-i18next
+- **Routing**: React Router DOM 7.9.5
+- **Build Tool**: Create React App (React Scripts 5.0.1)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 📋 Prerequisites
 
-### `npm test`
+- Node.js 18+ (recommended)
+- npm or yarn package manager
+- GraphQL API endpoint configured
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Quick Start
 
-### `npm run build`
+### Local Development
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/amifaldu/task_management_system_frontend.git
+   cd task-management-frontend
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. **Start development server**
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
 
-### `npm run eject`
+   The application will be available at `http://localhost:3000`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Docker Development
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Build Docker image**
+   ```bash
+   docker build -t task-management-frontend .
+   ```
+2. **Run container**
+   ```bash
+   docker run -p 3001:3001 task-management-frontend
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+   The application will be available at `http://localhost:3001`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📁 Project Structure
 
-## Learn More
+```
+src/
+├── components/           # React components
+│   ├── CreateTask.js    # Task creation form
+│   ├── EditTask.js      # Task editing form
+│   ├── ErrorBoundary.js # Error handling component
+│   ├── Pagination.js    # Pagination controls
+│   ├── StatusSelector.js # Status selection dropdown
+│   ├── TaskForm.js      # Reusable task form
+│   ├── TaskItem.js      # Individual task display
+│   ├── TaskList.js      # Task list container
+│   └── LoadingSpinner.js # Loading indicator
+├── constants/           # Application constants
+│   └── statusConstants.js # Task status definitions
+├── graphql/            # GraphQL operations
+│   ├── queries.js      # GraphQL queries
+│   └── mutations.js    # GraphQL mutations
+├── hooks/              # Custom React hooks
+│   ├── useApolloCache.js    # Apollo cache utilities
+│   ├── useErrorHandler.js   # Error handling hook
+│   ├── usePagination.js     # Pagination logic
+│   ├── useSuccessMessage.js # Success message handling
+│   ├── useTaskActions.js    # Task CRUD operations
+│   ├── useTaskForm.js       # Form state management
+│   └── useTranslations.js   # i18n utilities
+├── i18n/               # Internationalization
+│   └── config.js       # i18next configuration
+├── locales/            # Translation files
+│   └── en/             # English translations
+├── utils/              # Utility functions
+│   └── statusUtils.js  # Status-related utilities
+├── apollo/             # Apollo Client setup
+│   └── client.js       # GraphQL client configuration
+├── routes/             # Application routing
+│   └── index.js        # Route definitions
+├── App.js              # Main application component
+└── index.js            # Application entry point
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔧 Configuration
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### GraphQL Schema
 
-### Code Splitting
+The application expects a GraphQL schema with the following types:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```graphql
+type Task {
+  id: ID!
+  title: String!
+  description: String
+  status: StatusEnum!
+}
 
-### Analyzing the Bundle Size
+enum StatusEnum {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
 
-### Making a Progressive Web App
+type TaskEdge {
+  node: Task!
+  cursor: String!
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+type TaskConnection {
+  edges: [TaskEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+```
 
-### Advanced Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 📊 Features in Detail
 
-### Deployment
+### Task Management
+- **Create Tasks**: Add new tasks with title, description, and status
+- **Edit Tasks**: Update existing task information
+- **Delete Tasks**: Remove tasks with confirmation
+- **Status Management**: Track task progress (Todo, In Progress, Completed)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Pagination
+- **Cursor-based Pagination**: Efficient for large datasets
+- **Configurable Page Size**: Adjustable number of items per page
+- **Navigation Controls**: Previous/Next buttons with page info
 
-### `npm run build` fails to minify
+### Error Handling
+- **Error Boundaries**: Catch and display React errors gracefully
+- **API Error Handling**: User-friendly error messages for GraphQL errors
+- **Form Validation**: Client-side validation with error feedback
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🚀 Deployment
+
+### Build Optimization
+
+```bash
+# Create optimized production build
+npm run build
+```
+
+## 🚀 Author
+Ami Faldu
